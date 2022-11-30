@@ -25,17 +25,17 @@ Pytorch
 
 ## Poster
 
-<img src = "./Materials/poster.png" width="50%"> 
+<img src = "./Materials/poster.png" width="100%"> 
 
 <br/>
 
 ## Additional Experimental Result
 
-<img src = "./Materials/Additional experiment1.png" width="50%"> 
+<img src = "./Materials/Additional experiment1.png" width="100%"> 
 Accuracy for ablation study
 
 <br/>
 <br/>
 
-<img src = "./Materials/Additional experiment2.png" width="50%"> 
+<img src = "./Materials/Additional experiment2.png" width="100%"> 
 MSE loss for ablation study
