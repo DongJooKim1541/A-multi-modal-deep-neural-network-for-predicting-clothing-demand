@@ -1,5 +1,5 @@
 # A multi-modal deep neural network for predicting clothing demand
-A multi-modal deep neural network for predicting clothing demand paper in IEIE 2022
+A multi-modal deep neural network for predicting clothing demand paper in IEIE 2022(https://conf.theieie.org/2022f/)
 
 <br/>
 
