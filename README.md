@@ -4,7 +4,7 @@ A multi-modal deep neural network for predicting clothing demand paper in IEIE 2
 <br/>
 
 ## Paper
-./Materials/paper.pdf
+https://github.com/DongJooKim1541/A-multi-modal-deep-neural-network-for-predicting-clothing-demand/blob/main/Materials/paper.pdf
 
 <br/>
 
