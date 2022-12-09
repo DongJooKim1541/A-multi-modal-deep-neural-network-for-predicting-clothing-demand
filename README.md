@@ -19,6 +19,8 @@ Web scrapping from Musinsa web-site(https://www.musinsa.com/app/)
 Python  
 CNN(Convolutional Neural Network)
 BERT(Bidirectional Encoder Representations from Transformer)
+Multi task learning
+Image classification
 Pytorch  
 ```
 
