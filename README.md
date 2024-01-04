@@ -20,6 +20,12 @@ Image classification
 Pytorch  
 ```
 
+## Running the Code
+To train the deep neural network for predicting clothing demand.
+```
+main.py
+```
+
 ## Poster
 
 <img src = "./Materials/poster.png" width="100%"> 
