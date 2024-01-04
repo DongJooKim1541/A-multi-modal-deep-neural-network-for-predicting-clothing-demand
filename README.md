@@ -10,7 +10,7 @@
 Web scrapping from Musinsa web-site. (https://www.musinsa.com/app/)
 
 
-## 기술 stack
+## Stack
 ```
 Python  
 CNN(Convolutional Neural Network)
