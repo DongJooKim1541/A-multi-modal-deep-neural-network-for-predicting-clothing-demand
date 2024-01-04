@@ -25,6 +25,10 @@ To train the deep neural network for predicting clothing demand.
 ```
 main.py
 ```
+To train the uni-modal(only image) settings.
+```
+main_noword_ablation.py
+```
 
 ## Poster
 
