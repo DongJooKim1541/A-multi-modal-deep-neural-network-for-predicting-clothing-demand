@@ -5,21 +5,21 @@ A multi-modal deep neural network for predicting clothing demand paper in IEIE 2
 <br/>
 
 ## Paper
-https://github.com/DongJooKim1541/A-multi-modal-deep-neural-network-for-predicting-clothing-demand/blob/main/Materials/paper.pdf
+https://www.dbpia.co.kr/pdf/pdfView.do?nodeId=NODE11195634&googleIPSandBox=false&mark=0&ipRange=false&b2cLoginYN=false&isPDFSizeAllowed=true&accessgl=Y&language=ko_KR&hasTopBanner=true
 
 <br/>
 
 ## Dataset
-Web scrapping from Musinsa web-site(https://www.musinsa.com/app/)
+Web scrapping from Musinsa web-site. (https://www.musinsa.com/app/)
 
 <br/>
 
-## Application technology
+## Stack
 ```
 Python  
 CNN(Convolutional Neural Network)
 BERT(Bidirectional Encoder Representations from Transformer)
-Multi task learning
+Multi-modal learning
 Image classification
 Pytorch  
 ```
