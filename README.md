@@ -1,4 +1,4 @@
-# A multi-modal deep neural network for predicting clothing demand
+# 의류 수요 정보 예측을 위한 멀티모달 기반 딥 뉴럴 네트워크
 
 [2022 대한전자공학회 추계학술대회](https://conf.theieie.org/2022f/) 발표<br/>
 
