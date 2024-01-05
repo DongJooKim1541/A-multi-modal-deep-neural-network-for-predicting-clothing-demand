@@ -10,7 +10,7 @@
 Web scrapping from Musinsa web-site. (https://www.musinsa.com/app/)
 
 ## About paper
-의류 이미지 및 여러 정보를 활용하여 의류 수요 정보를 예측하는 인공지능 모델을 구현 및 학습
+의류 이미지 및 여러 관련 정보를 활용하여 의류 수요 정보를 예측하는 인공지능 모델을 구현 및 학습했습니다.
 
 ## Stack
 ```
