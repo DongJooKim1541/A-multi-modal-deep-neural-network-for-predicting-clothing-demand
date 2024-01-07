@@ -4,7 +4,7 @@
 
 ## Paper
 [의류 수요 정보 예측을 위한 멀티모달 기반 딥 뉴럴 네트워크](https://www.dbpia.co.kr/pdf/pdfView.do?nodeId=NODE11195634&googleIPSandBox=false&mark=0&ipRange=false&b2cLoginYN=false&isPDFSizeAllowed=true&accessgl=Y&language=ko_KR&hasTopBanner=true)<br/>
-[의류 수요 정보 예측을 위한 멀티모달 기반 딥 뉴럴 네트워크(Github 첨부파일)](./materials/paper.pdf)
+[의류 수요 정보 예측을 위한 멀티모달 기반 딥 뉴럴 네트워크(Github 첨부파일)](./Materials/paper.pdf)
 
 ## Dataset
 Web scrapping from Musinsa web-site. (https://www.musinsa.com/app/)
