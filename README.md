@@ -19,7 +19,8 @@ CNN(Convolutional Neural Network)
 BERT(Bidirectional Encoder Representations from Transformer)
 Multi-modal learning
 Image classification
-Pytorch  
+Pytorch
+Web scrapping
 ```
 
 ## Running the Code
@@ -30,6 +31,10 @@ main.py
 To train the uni-modal(only image) settings.
 ```
 main_noword_ablation.py
+```
+To perform web scrapping.
+```
+web_scrapping_python.py
 ```
 
 ## Poster
