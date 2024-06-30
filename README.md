@@ -40,3 +40,14 @@ web_scrapping_python.py
 ## Poster
 
 <img src = "./Materials/poster.png" width="100%"> 
+
+## Citation
+```
+@article{김동주2022의류,
+  title={의류 수요 정보 예측을 위한 멀티모달 기반 딥 뉴럴 네트워크},
+  author={김동주 and 이민식},
+  journal={대한전자공학회 학술대회},
+  pages={788--791},
+  year={2022}
+}
+```
