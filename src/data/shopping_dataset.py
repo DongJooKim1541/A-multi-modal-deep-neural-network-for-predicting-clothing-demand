@@ -7,7 +7,7 @@ from torchvision import transforms
 from PIL import Image
 import random
 import math
-from config import *
+from ..config import *
 
 
 df=pd.read_csv(csv_path,encoding='cp949')
@@ -81,7 +81,7 @@ class ShoppingDataset(Dataset):
                     self.label_sales.append(math.log(int(float(list[7]))))
                 else:
                     self.label_sales.append(int(float(list[7])))
-                self.price.append(int(float(list[9])))
+                self.price.append(int(float(list[8])))
                 self.category.append(int(float(list[10])))
         elif not self.train:
             print("Test")
@@ -148,12 +148,3 @@ class ShoppingDataset(Dataset):
             transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         ])
         return transform_ops(image)
-
-    def get_bert_feature(self, clothing, tokenizer, net_bert):
-        encoded_input = tokenizer(clothing, return_tensors='pt')
-        output = net_bert(**encoded_input)
-        # print(output[1].shape)
-        output = output[1].clone().detach().cuda()
-        return output
-
-

@@ -6,10 +6,9 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-import shoppingDataset_loader
-from config import *
-from models import resnet_pre_trained
-from shoppingDataset_loader import *
+from .config import *
+from .models import ResNet
+from .data.shopping_dataset import ShoppingDataset
 from torch import nn
 
 from transformers import BertTokenizer, BertModel
@@ -216,7 +215,7 @@ def train(model, train_loader, optimizer):
 
 def get_bert_feature_by_batch(clothing_feature):
     for i in range(0,len(clothing_feature)):
-        if i is 0:
+        if i == 0:
             out_concat=clothing_feature[0]
         else:
             out_concat = torch.cat((out_concat, clothing_feature[i]), dim=0)
@@ -325,8 +324,12 @@ if __name__ == '__main__':
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
+    # Ensure output directories exist
+    os.makedirs('model_weights', exist_ok=True)
+    os.makedirs('results', exist_ok=True)
+
     # _net = Network.ConvNet().cuda()
-    _net = resnet_pre_trained.ResNet().cuda()
+    _net = ResNet().cuda()
     # _net = resnet.ResNet().cuda()
     net = nn.DataParallel(_net).to(device)
 
@@ -353,7 +356,7 @@ if __name__ == '__main__':
     f.write("lr: " + str(lr) + "\n")
     f.write("weight_decay: " + str(weight_decay) + "\n")
     f.write("clip_norm: " + str(clip_norm) + "\n")
-    f.write("dir: " + str(shoppingDataset_loader.data_path) + "\n")
+    f.write("dir: " + str(data_path) + "\n")
     f.write("total_train_time: " + str(total_train_evaluate_time) + "\n")
     f.write("\n")
     f.write("train_epoch_acc= ")

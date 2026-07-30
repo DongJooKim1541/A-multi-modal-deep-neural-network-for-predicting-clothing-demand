@@ -1,0 +1,84 @@
+# Data & Models
+dataset/
+DATA/
+model_weights/
+results/
+checkpoint/
+*.pth
+*.pt
+
+# Web scraping outputs
+images/
+info.csv
+loss/
+
+# Selenium & ChromeDriver
+chromedriver
+chromedriver.exe
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Misc
+.cache/
+.pytest_cache/
+*.txt
+!requirements.txt
