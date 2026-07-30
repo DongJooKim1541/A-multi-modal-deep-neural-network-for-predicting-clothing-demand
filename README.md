@@ -141,7 +141,7 @@ python -m src.train_single_task --analysis view
 python -m src.train_single_task --analysis sales
 ```
 
-**Note:** Despite the script naming ("train_single_task"), this mode still uses BERT features; it is a single-task ablation (one head at a time), not a text-removal ablation. See [docs/SDD.md](docs/SDD.md#known-limitations) for details.
+**Note:** Despite the script naming ("train_single_task"), this mode still uses BERT features; it is a single-task ablation (one head at a time), not a text-removal ablation. See [docs/SDD.md](docs/SDD.md#8-known-limitations--deviations) for details.
 
 ## Experimental Results
 
