@@ -1,5 +1,6 @@
 import os
 import time
+import argparse
 
 import numpy as np
 import torch
@@ -13,6 +14,14 @@ from shoppingDataset_loader import *
 from torch import nn
 
 from transformers import BertTokenizer, BertModel
+
+""" Parse CLI arguments """
+parser = argparse.ArgumentParser(description='Single-task training mode')
+parser.add_argument('--analysis', type=str, required=True,
+                    choices=['best_sex', 'best_age', 'view', 'sales'],
+                    help='Choose which task to train: best_sex, best_age, view, or sales')
+args = parser.parse_args()
+analysis = args.analysis
 
 """ Device Confirmation """
 if torch.cuda.is_available():
@@ -114,9 +123,11 @@ def train(model, train_loader, optimizer):
 
         bert_feature_batch = get_bert_feature_by_batch(clothing_feature)
         #print("train bert_feature_batch: ",bert_feature_batch)
-        preds = model(image.cuda(), sex.cuda(), price.cuda(), category.cuda(), bert_feature_batch.cuda())  # torch.Size([BATCH_SIZE, NUM_CLASSES])
+        preds_tuple = model(image.cuda(), sex.cuda(), price.cuda(), category.cuda(), bert_feature_batch.cuda())  # 4-tuple: (best_sex, best_age, view, sales)
 
+        # Select the appropriate head based on analysis
         if analysis=="best_sex":
+            preds = preds_tuple[0]  # best_sex head
             best_sex_prediction = preds.max(1, keepdim=True)[1]
             correct_best_sex += best_sex_prediction.eq(label_best_sex.view_as(best_sex_prediction)).sum().item()
 
@@ -126,6 +137,7 @@ def train(model, train_loader, optimizer):
 
             train_best_sex_loss_list.append(train_iteration_best_sex_loss.item())
         elif analysis=="best_age":
+            preds = preds_tuple[1]  # best_age head
             best_age_prediction = preds.max(1, keepdim=True)[1]
             correct_best_age += best_age_prediction.eq(label_best_age.view_as(best_age_prediction)).sum().item()
 
@@ -137,6 +149,7 @@ def train(model, train_loader, optimizer):
 
             train_best_age_loss_list.append(train_iteration_best_age_loss.item())
         elif analysis=="view":
+            preds = preds_tuple[2]  # view head
             label_view = label_view.type(torch.FloatTensor)
             label_view = label_view.cuda()
             train_iteration_view_loss = criterion_regression(preds, label_view)
@@ -145,6 +158,7 @@ def train(model, train_loader, optimizer):
 
             train_view_loss_list.append(train_iteration_view_loss.item())
         elif analysis=="sales":
+            preds = preds_tuple[3]  # sales head
             label_sales = label_sales.type(torch.FloatTensor)
             label_sales = label_sales.cuda()
             train_iteration_sales_loss = criterion_regression(preds, label_sales)
@@ -187,7 +201,7 @@ def train(model, train_loader, optimizer):
 
 def get_bert_feature_by_batch(clothing_feature):
     for i in range(0,len(clothing_feature)):
-        if i is 0:
+        if i == 0:
             out_concat=clothing_feature[0]
         else:
             out_concat = torch.cat((out_concat, clothing_feature[i]), dim=0)
@@ -216,9 +230,10 @@ def evaluate(model, test_loader):
 
             bert_feature_batch = get_bert_feature_by_batch(clothing_feature)
             #print("test bert_feature_batch: ", bert_feature_batch)
-            preds = model(image.cuda(), sex.cuda(), price.cuda(), category.cuda(),bert_feature_batch.cuda())  # torch.Size([BATCH_SIZE, NUM_CLASSES])
+            preds_tuple = model(image.cuda(), sex.cuda(), price.cuda(), category.cuda(),bert_feature_batch.cuda())  # 4-tuple: (best_sex, best_age, view, sales)
 
             if analysis == "best_sex":
+                preds = preds_tuple[0]  # best_sex head
                 best_sex_prediction = preds.max(1, keepdim=True)[1]
                 correct_best_sex += best_sex_prediction.eq(label_best_sex.view_as(best_sex_prediction)).sum().item()
 
@@ -230,6 +245,7 @@ def evaluate(model, test_loader):
                 print("Epoch:{}   Test acc:{}".format(epoch + 1, test_total_acc))
                 test_epoch_acc.append(test_total_acc)
             elif analysis == "best_age":
+                preds = preds_tuple[1]  # best_age head
                 best_age_prediction = preds.max(1, keepdim=True)[1]
                 correct_best_age += best_age_prediction.eq(label_best_age.view_as(best_age_prediction)).sum().item()
 
@@ -240,6 +256,7 @@ def evaluate(model, test_loader):
                 print("Epoch:{}   Test acc:{}".format(epoch + 1, test_total_acc))
                 test_epoch_acc.append(test_total_acc)
             elif analysis == "view":
+                preds = preds_tuple[2]  # view head
                 label_view = label_view.type(torch.FloatTensor)
                 label_view = label_view.cuda()
 
@@ -247,6 +264,7 @@ def evaluate(model, test_loader):
 
                 test_total_loss = test_view_loss
             elif analysis == "sales":
+                preds = preds_tuple[3]  # sales head
                 label_sales = label_sales.type(torch.FloatTensor)
                 label_sales = label_sales.cuda()
 
@@ -272,6 +290,10 @@ def evaluate(model, test_loader):
 if __name__ == '__main__':
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+
+    # Ensure output directories exist
+    os.makedirs('model_weights', exist_ok=True)
+    os.makedirs('results', exist_ok=True)
 
     # _net = Network.ConvNet().cuda()
     _net = resnet_pre_trained.ResNet().cuda()

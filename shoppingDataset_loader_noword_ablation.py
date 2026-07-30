@@ -76,7 +76,7 @@ class ShoppingDataset(Dataset):
                     self.label_sales.append(math.log(int(float(list[7]))))
                 else:
                     self.label_sales.append(int(float(list[7])))
-                self.price.append(int(float(list[9])))
+                self.price.append(int(float(list[8])))
                 self.category.append(int(float(list[10])))
         elif not self.train:
             print("Test")

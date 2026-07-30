@@ -216,7 +216,7 @@ def train(model, train_loader, optimizer):
 
 def get_bert_feature_by_batch(clothing_feature):
     for i in range(0,len(clothing_feature)):
-        if i is 0:
+        if i == 0:
             out_concat=clothing_feature[0]
         else:
             out_concat = torch.cat((out_concat, clothing_feature[i]), dim=0)
@@ -324,6 +324,10 @@ def evaluate(model, test_loader):
 if __name__ == '__main__':
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+
+    # Ensure output directories exist
+    os.makedirs('model_weights', exist_ok=True)
+    os.makedirs('results', exist_ok=True)
 
     # _net = Network.ConvNet().cuda()
     _net = resnet_pre_trained.ResNet().cuda()
