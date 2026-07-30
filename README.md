@@ -234,5 +234,5 @@ See [LICENSE](LICENSE) for details.
 ## Contact
 
 For questions or issues:
-- **Email:** dongjoo.kim@hanwha.com
+- **Email:** dongjookim1541@gmail.com
 - **Affiliation:** Vision Modeling Lab, Hanyang University
