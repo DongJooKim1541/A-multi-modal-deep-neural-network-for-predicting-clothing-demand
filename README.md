@@ -1,7 +1,7 @@
 # 의류 수요 정보 예측을 위한 멀티모달 딥 뉴럴 네트워크
 
 **저자:** 김동주, 이민식  
-**소속:** 한양대학교 응용인공지능학과, 전자공학과
+**소속:** 한양대학교 인공지능융합학과, 전자공학과
 
 [2022 대한전자공학회 추계학술대회](https://conf.theieie.org/2022f/)에서 발표
 
@@ -13,10 +13,10 @@
 - **다국어 BERT**: 상품명 인코딩
 - **테이블형 메타데이터** (성별, 가격, 카테고리): 맥락 정보
 - **멀티태스크 학습** (4개 예측 헤드):
-  1. 선호 성별 분류 (3 클래스)
-  2. 선호 연령대 분류 (7 클래스)
-  3. 조회수 회귀
-  4. 누적판매량 회귀
+  1. 선호 성별 (3 클래스)
+  2. 선호 연령대 (7 클래스)
+  3. 조회수
+  4. 누적판매량
 
 데이터셋은 무신사 온라인 쇼핑몰에서 웹 스크래핑하여 구성되며, 제품 이미지, 상품명, 가격 및 메타데이터와 스크래핑한 라벨 정보를 포함합니다. 자세한 아키텍처, 손실함수, 구현 상세는 [docs/SDD.md](docs/SDD.md)를 참고하세요.
 
@@ -29,15 +29,15 @@ kim2022multi/
 ├── .gitignore
 ├── requirements.txt
 ├── Materials/
-│   ├── paper.pdf               (학회 논문)
-│   ├── poster.png / poster.pdf  (학회 포스터)
+│   ├── paper.pdf                  (학회 논문)
+│   ├── poster.png / poster.pdf    (학회 포스터)
 │   ├── Additional experiment1.png    (훈련 곡선: 정확도)
 │   └── Additional experiment2.png    (훈련 곡선: 회귀 손실)
 ├── docs/
-│   ├── SDD.md                  (소프트웨어 설계 문서 — 아키텍처, 모듈, 데이터 흐름)
-│   └── TC.md                   (테스트 케이스 — 70+ 검증 항목)
+│   ├── SDD.md                      (소프트웨어 설계 문서 — 아키텍처, 모듈, 데이터 흐름)
+│   └── TC.md                       (테스트 케이스 — 70+ 검증 항목)
 └── src/
-    ├── config.py               (하이퍼파라미터: batch_size=64, num_epochs=3000, lr=1e-4 등)
+    ├── config.py                   (하이퍼파라미터: batch_size=64, num_epochs=3000, lr=1e-4 등)
     ├── models/
     │   ├── __init__.py
     │   └── resnet_pre_trained.py    (ResNet18 + BERT 융합 멀티태스크 모델)
@@ -77,7 +77,7 @@ pip install -r requirements.txt
 
 ## Dataset
 
-데이터셋은 한국 최대 온라인 패션 쇼핑몰인 [무신사](https://www.musinsa.com/)에서 상품 정보를 스크래핑하여 구성됩니다.
+데이터셋은 한국 온라인 패션 쇼핑몰인 [무신사](https://www.musinsa.com/)에서 상품 정보를 스크래핑하여 구성됩니다.
 
 **기대되는 구조** (저장소에 포함되지 않음):
 ```
@@ -121,7 +121,7 @@ python -m src.train
 - 모델 체크포인트: `model_weights/...model_state_dict.pt`
 - 훈련 로그: `results/AccLoss2.txt`
 
-**설정:** `src/config.py`를 수정하여 하이퍼파라미터 조정 (배치 크기, 학습률, 에포크, 손실 가중치).
+**설정:** `src/config.py`를 수정하여 하이퍼파라미터 조정 (batch, lr, epoch, loss weight).
 
 ### 3. Single-Task Evaluation (Ablation Study)
 
@@ -141,7 +141,7 @@ python -m src.train_single_task --analysis view
 python -m src.train_single_task --analysis sales
 ```
 
-**주의:** 스크립트명("train_single_task")과 달리 이 모드는 여전히 BERT 특징을 사용합니다. 이는 단일 태스크 어블레이션(한 번에 하나의 헤드)이지 텍스트 제거 어블레이션이 아닙니다. 자세한 내용은 [docs/SDD.md](docs/SDD.md#8-알려진-한계-및-편차)를 참고하세요.
+**주의:** 스크립트명("train_single_task")과 달리 이 모드는 여전히 BERT feature을 사용합니다. 이는 단일 태스크 어블레이션(한 번에 하나의 헤드)이지 텍스트 제거 설정은 아닙니다. 자세한 내용은 [docs/SDD.md](docs/SDD.md#8-알려진-한계-및-편차)를 참고하세요.
 
 ## Experimental Results
 
@@ -224,10 +224,6 @@ python -m src.train_single_task --analysis sales
 김동주, and 이민식. "의류 수요 정보 예측을 위한 멀티모달 기반 딥 뉴럴 네트워크." 대한전자공학회 학술대회 (2022): 788-791.
 ```
 
-## Related Work
-
-본 프로젝트는 패션 수요 예측에 멀티모달 학습을 적용합니다. 회전 자감시 과제를 이용한 능동 학습에 대한 관련 연구는 자매 저장소를 참고하세요: [kim2024interpreting](https://github.com/DongJooKim1541/kim2024interpreting)
-
 ## License
 
 자세한 내용은 [LICENSE](LICENSE)를 참고하세요.
@@ -236,4 +232,4 @@ python -m src.train_single_task --analysis sales
 
 질문이나 문제 사항:
 - **이메일:** dongjookim1541@gmail.com
-- **소속:** 한양대학교 응용인공지능학과
+- **소속:** 한양대학교 인공지능융합학과
