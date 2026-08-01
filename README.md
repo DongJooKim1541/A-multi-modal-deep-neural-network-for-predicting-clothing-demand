@@ -1,205 +1,205 @@
-# A Multi-modal Deep Neural Network for Predicting Clothing Demand
+# 의류 수요 정보 예측을 위한 멀티모달 딥 뉴럴 네트워크
 
-**Authors:** Dongjoo Kim, Minsik Lee  
-**Affiliation:** Department of Applied Artificial Intelligence, Department of Electrical Engineering, Hanyang University
+**저자:** 김동주, 이민식  
+**소속:** 한양대학교 응용인공지능학과, 전자공학과
 
-Presented at [2022 Korean Institute of Electronics Engineers Autumn Conference](https://conf.theieie.org/2022f/)
+[2022 대한전자공학회 추계학술대회](https://conf.theieie.org/2022f/)에서 발표
 
 ## Overview
 
-This project proposes a multi-modal deep neural network that combines visual and textual information to predict quantitative clothing demand (views and cumulative sales) from online shopping data. The model architecture integrates:
+본 프로젝트는 온라인 쇼핑 데이터에서 시각적(이미지)과 텍스트 정보를 결합하여 의류 상품의 수요 정보(조회수, 누적판매량)를 예측하는 멀티모달 딥 뉴럴 네트워크를 제안합니다. 모델 아키텍처는 다음을 통합합니다:
 
-- **ResNet18** (pre-trained) for image feature extraction
-- **Multilingual BERT** for product name encoding
-- **Tabular metadata** (gender, price, category) for context
-- **Multi-task learning** with 4 prediction heads:
-  1. Preferred gender classification (3 classes)
-  2. Preferred age group classification (7 classes)
-  3. View count regression
-  4. Cumulative sales regression
+- **ResNet18** (사전학습 모델): 이미지 특징 추출
+- **다국어 BERT**: 상품명 인코딩
+- **테이블형 메타데이터** (성별, 가격, 카테고리): 맥락 정보
+- **멀티태스크 학습** (4개 예측 헤드):
+  1. 선호 성별 분류 (3 클래스)
+  2. 선호 연령대 분류 (7 클래스)
+  3. 조회수 회귀
+  4. 누적판매량 회귀
 
-The dataset is constructed by web scraping the MUSINSA online shopping mall, combining product images, names, prices, and other metadata with scraped label information. For detailed architecture, loss functions, and implementation details, see [docs/SDD.md](docs/SDD.md).
+데이터셋은 무신사 온라인 쇼핑몰에서 웹 스크래핑하여 구성되며, 제품 이미지, 상품명, 가격 및 메타데이터와 스크래핑한 라벨 정보를 포함합니다. 자세한 아키텍처, 손실함수, 구현 상세는 [docs/SDD.md](docs/SDD.md)를 참고하세요.
 
 ## Repository Structure
 
 ```
 kim2022multi/
-├── README.md                    (this file)
+├── README.md                    (본 파일)
 ├── LICENSE
 ├── .gitignore
 ├── requirements.txt
 ├── Materials/
-│   ├── paper.pdf               (full paper)
-│   ├── poster.png / poster.pdf  (conference poster)
-│   ├── Additional experiment1.png    (training curves: accuracy)
-│   └── Additional experiment2.png    (training curves: regression loss)
+│   ├── paper.pdf               (학회 논문)
+│   ├── poster.png / poster.pdf  (학회 포스터)
+│   ├── Additional experiment1.png    (훈련 곡선: 정확도)
+│   └── Additional experiment2.png    (훈련 곡선: 회귀 손실)
 ├── docs/
-│   ├── SDD.md                  (Software Design Document — architecture, modules, data flow)
-│   └── TC.md                   (Test Cases — 70+ assertions for validation)
+│   ├── SDD.md                  (소프트웨어 설계 문서 — 아키텍처, 모듈, 데이터 흐름)
+│   └── TC.md                   (테스트 케이스 — 70+ 검증 항목)
 └── src/
-    ├── config.py               (hyperparameters: batch_size=64, num_epochs=3000, lr=1e-4, etc.)
+    ├── config.py               (하이퍼파라미터: batch_size=64, num_epochs=3000, lr=1e-4 등)
     ├── models/
     │   ├── __init__.py
-    │   └── resnet_pre_trained.py    (ResNet18 + BERT fusion multi-task model)
+    │   └── resnet_pre_trained.py    (ResNet18 + BERT 융합 멀티태스크 모델)
     ├── data/
-    │   └── shopping_dataset.py      (MUSINSA dataset loader with filename parsing)
+    │   └── shopping_dataset.py      (파일명 파싱을 포함한 무신사 데이터셋 로더)
     ├── utils/
-    │   ├── bert_features.py         (BERT tokenization & feature extraction)
-    │   ├── training_utils.py        (focal loss, multi-task loss, accuracy metrics)
-    │   └── io_utils.py              (checkpoint/results I/O, directory creation)
-    ├── train.py                     (main training loop: 4-head joint learning)
-    ├── train_single_task.py         (single-task ablation: per-head evaluation)
+    │   ├── bert_features.py         (BERT 토큰화 및 특징 추출)
+    │   ├── training_utils.py        (포칼 손실, 멀티태스크 손실, 정확도 메트릭)
+    │   └── io_utils.py              (체크포인트/결과 저장, 디렉토리 생성)
+    ├── train.py                     (메인 훈련 루프: 4개 헤드 결합 학습)
+    ├── train_single_task.py         (단일 태스크 어블레이션: 헤드별 평가)
     └── scraping/
-        └── musinsa_scraper.py       (web scraping pipeline for dataset collection)
+        └── musinsa_scraper.py       (데이터셋 수집용 웹 스크래핑 파이프라인)
 ```
 
 ## Installation
 
 ### Prerequisites
 - Python 3.8+
-- CUDA 11.0+ (for GPU training)
-- ChromeDriver (for data collection only)
+- CUDA 11.0+ (GPU 훈련용)
+- ChromeDriver (데이터 수집용)
 
 ### Setup
 
 ```bash
-# Clone and navigate to repository
-git clone <repo_url>
+# 저장소 클론 및 디렉토리 이동
+git clone <저장소_url>
 cd kim2022multi
 
-# Create virtual environment
+# 가상 환경 생성
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install dependencies
+# 의존성 설치
 pip install -r requirements.txt
 ```
 
 ## Dataset
 
-The dataset is constructed by scraping product information from [MUSINSA](https://www.musinsa.com/), Korea's largest online shopping mall for fashion.
+데이터셋은 한국 최대 온라인 패션 쇼핑몰인 [무신사](https://www.musinsa.com/)에서 상품 정보를 스크래핑하여 구성됩니다.
 
-**Expected structure** (not included in repository):
+**기대되는 구조** (저장소에 포함되지 않음):
 ```
 dataset/
 ├── train/
-│   ├── <product_id>.png  (resized to 125×125)
+│   ├── <상품_id>.png  (125×125로 크기 조정)
 │   └── ...
 ├── test/
-│   ├── <product_id>.png
+│   ├── <상품_id>.png
 │   └── ...
-└── info.csv              (product metadata and labels)
+└── info.csv              (상품 메타데이터 및 라벨)
 ```
 
-**Note:** The dataset is not redistributed in this repository due to potential copyright/ToS considerations with MUSINSA. To recreate the dataset, run the scraping pipeline (see Usage below).
+**주의:** 데이터셋은 무신사의 저작권 및 이용약관 고려사항으로 인해 본 저장소에서 재배포되지 않습니다. 데이터셋을 다시 구성하려면 스크래핑 파이프라인을 실행하세요 (아래 사용법 참고).
 
 ## Usage
 
 ### 1. Data Collection (Optional)
 
-Scrape product data from MUSINSA:
+무신사에서 상품 데이터 스크래핑:
 
 ```bash
-# Set ChromeDriver path
-export CHROMEDRIVER_PATH=/path/to/chromedriver  # or use environment variable
+# ChromeDriver 경로 설정
+export CHROMEDRIVER_PATH=/경로/to/chromedriver  # 또는 환경변수로 설정
 
-# Run scraper (may take several hours)
+# 스크래퍼 실행 (수시간 소요 가능)
 python -m src.scraping.musinsa_scraper
 ```
 
-**Output:** `dataset/train/`, `dataset/test/`, `info.csv`
+**출력:** `dataset/train/`, `dataset/test/`, `info.csv`
 
 ### 2. Multi-Task Training
 
-Train all 4 heads jointly with combined loss:
+4개 헤드를 결합 손실로 동시 훈련:
 
 ```bash
 python -m src.train
 ```
 
-**Output:**
-- Model checkpoint: `model_weights/...model_state_dict.pt`
-- Training logs: `results/AccLoss2.txt`
+**출력:**
+- 모델 체크포인트: `model_weights/...model_state_dict.pt`
+- 훈련 로그: `results/AccLoss2.txt`
 
-**Configuration:** Edit `src/config.py` to adjust hyperparameters (batch size, learning rate, epochs, loss weights).
+**설정:** `src/config.py`를 수정하여 하이퍼파라미터 조정 (배치 크기, 학습률, 에포크, 손실 가중치).
 
 ### 3. Single-Task Evaluation (Ablation Study)
 
-Evaluate each prediction head independently:
+각 예측 헤드를 독립적으로 평가:
 
 ```bash
-# Train only preferred gender classifier
+# 선호 성별 분류기만 훈련
 python -m src.train_single_task --analysis best_sex
 
-# Train only preferred age classifier (with focal loss for imbalance)
+# 선호 연령대 분류기만 훈련 (클래스 불균형 처리용 포칼 손실)
 python -m src.train_single_task --analysis best_age
 
-# Train only view count regression
+# 조회수 회귀만 훈련
 python -m src.train_single_task --analysis view
 
-# Train only cumulative sales regression
+# 누적판매량 회귀만 훈련
 python -m src.train_single_task --analysis sales
 ```
 
-**Note:** Despite the script naming ("train_single_task"), this mode still uses BERT features; it is a single-task ablation (one head at a time), not a text-removal ablation. See [docs/SDD.md](docs/SDD.md#known-limitations) for details.
+**주의:** 스크립트명("train_single_task")과 달리 이 모드는 여전히 BERT 특징을 사용합니다. 이는 단일 태스크 어블레이션(한 번에 하나의 헤드)이지 텍스트 제거 어블레이션이 아닙니다. 자세한 내용은 [docs/SDD.md](docs/SDD.md#8-알려진-한계-및-편차)를 참고하세요.
 
 ## Experimental Results
 
-**Test Set Performance** (from poster, 3,000 epochs):
+**테스트 셋 성능** (포스터, 3,000 에포크):
 
-| Metric | Proposed Method | No-Word Ablation |
-|--------|-----------------|------------------|
-| Preferred Gender Accuracy | 84.5% | 83.9% |
-| Preferred Age Accuracy | 73.7% | 73.5% |
-| View Count MSE | 0.092 | 0.090 |
-| Cumulative Sales MSE | 0.054 | 0.058 |
+| 지표 | 제안 방법 | 텍스트 없음 어블레이션 |
+|------|----------|----------------------|
+| 선호 성별 정확도 | 84.5% | 83.9% |
+| 선호 연령대 정확도 | 73.7% | 73.5% |
+| 조회수 MSE | 0.092 | 0.090 |
+| 누적판매량 MSE | 0.054 | 0.058 |
 
-The **proposed multi-modal method** achieves superior performance in 3 out of 4 metrics (gender, age, sales) by effectively leveraging both image and text features, with competitive view prediction despite higher initial loss.
+**제안된 멀티모달 방법**은 이미지와 텍스트 특징을 효과적으로 활용하여 4개 지표 중 3개(성별, 연령대, 판매량)에서 우수한 성능을 달성합니다.
 
-See [Materials/Additional experiment1.png](Materials/Additional%20experiment1.png) and [Materials/Additional experiment2.png](Materials/Additional%20experiment2.png) for full training curves across all model variants and epochs.
+전체 훈련 곡선과 모든 모델 변형에 대한 자세한 내용은 [Materials/Additional experiment1.png](Materials/Additional%20experiment1.png)과 [Materials/Additional experiment2.png](Materials/Additional%20experiment2.png)를 참고하세요.
 
 ## Configuration
 
-Key hyperparameters in `src/config.py`:
+`src/config.py`의 주요 하이퍼파라미터:
 
 - `batch_size`: 64
 - `num_epochs`: 3000
-- `lr`: 0.0001 (Adam optimizer)
+- `lr`: 0.0001 (Adam 옵티마이저)
 - `weight_decay`: 1e-5
-- **Focal loss:** α=1, γ=2 (applied to preferred age classification to handle class imbalance)
-- **Multi-task loss weights:** 
-  - Gender: 1.0 (cross-entropy)
-  - Age: 1.0 (focal loss)
-  - View: 0.01 (MSE)
-  - Sales: 0.01 (MSE)
+- **포칼 손실:** α=1, γ=2 (선호 연령대 분류의 클래스 불균형 처리)
+- **멀티태스크 손실 가중치:**
+  - 성별: 1.0 (교차 엔트로피)
+  - 연령대: 1.0 (포칼 손실)
+  - 조회수: 0.01 (MSE)
+  - 판매량: 0.01 (MSE)
 
-For full architecture details, see [docs/SDD.md](docs/SDD.md).
+전체 아키텍처 상세는 [docs/SDD.md](docs/SDD.md)를 참고하세요.
 
 ## Technical Documentation
 
-- **[docs/SDD.md](docs/SDD.md)** — Software Design Document
-  - System architecture and data pipeline
-  - Detailed module descriptions (8 files)
-  - Filename encoding scheme (11-field format)
-  - Loss function derivations
-  - Paper ↔ code alignment mapping
-  - Known limitations and design decisions
+- **[docs/SDD.md](docs/SDD.md)** — 소프트웨어 설계 문서
+  - 시스템 아키텍처 및 데이터 파이프라인
+  - 상세 모듈 설명 (8개 파일)
+  - 파일명 인코딩 스킴 (11필드 포맷)
+  - 손실함수 유도
+  - 논문 ↔ 코드 대응 맵핑
+  - 알려진 한계 및 설계 결정사항
 
-- **[docs/TC.md](docs/TC.md)** — Test Cases
-  - 70+ assertions covering unit, integration, system, and regression tests
-  - Bug fix validation (price index parity, BERT feature ordering, etc.)
-  - Checkpoint save/load verification
-  - Multi-task loss formula validation
+- **[docs/TC.md](docs/TC.md)** — 테스트 케이스
+  - 유닛, 통합, 시스템, 회귀 테스트를 포함한 70+ 검증 항목
+  - 버그 수정 검증 (가격 인덱스 일치성, BERT 특징 순서 등)
+  - 체크포인트 저장/로드 검증
+  - 멀티태스크 손실 공식 검증
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| `FileNotFoundError: model_weights/` or `results/` | Directories are created automatically on first run. Ensure write permissions. |
-| `CUDA out of memory` | Reduce `batch_size` in `src/config.py` (default: 64). |
-| `BertModel download fails` (offline) | Pre-download: `python -c "from transformers import BertModel; BertModel.from_pretrained('bert-base-multilingual-cased')"` |
-| ChromeDriver version mismatch | Match ChromeDriver version to your Chrome/Chromium browser. |
-| CSV encoding errors | Ensure `info.csv` is encoded in **cp949** (Korean, EUC-KR), as used by MUSINSA export. |
+| 문제 | 해결책 |
+|------|--------|
+| `FileNotFoundError: model_weights/` 또는 `results/` | 디렉토리는 첫 실행 시 자동 생성됩니다. 쓰기 권한을 확인하세요. |
+| `CUDA out of memory` | `src/config.py`에서 `batch_size` 감소 (기본값: 64). |
+| `BertModel download fails` (오프라인) | 사전 다운로드: `python -c "from transformers import BertModel; BertModel.from_pretrained('bert-base-multilingual-cased')"` |
+| ChromeDriver 버전 불일치 | ChromeDriver 버전을 Chrome/Chromium 브라우저 버전과 일치시키세요. |
+| CSV 인코딩 에러 | `info.csv`가 **cp949** (한글, EUC-KR)로 인코딩되었는지 확인하세요. (무신사 내보내기 형식) |
 
 ## Poster
 
@@ -211,28 +211,29 @@ For full architecture details, see [docs/SDD.md](docs/SDD.md).
 @inproceedings{kim2022multimodal,
   title={의류 수요 정보 예측을 위한 멀티모달 기반 딥 뉴럴 네트워크},
   author={Kim, Dongjoo and Lee, Minsik},
-  booktitle={Proceedings of the Korean Institute of Electronics Engineers Autumn Conference},
+  booktitle={대한전자공학회 학술대회},
   year={2022},
   pages={788--791},
   organization={KIEE}
 }
 ```
 
-Alternative citation:
+다른 인용 형식:
+
 ```
 김동주, and 이민식. "의류 수요 정보 예측을 위한 멀티모달 기반 딥 뉴럴 네트워크." 대한전자공학회 학술대회 (2022): 788-791.
 ```
 
 ## Related Work
 
-This project applies multi-modal learning to fashion demand prediction. For related work on active learning with rotation pretext tasks, see the sister repository: [kim2024interpreting](https://github.com/dongjoo-kim/kim2024interpreting).
+본 프로젝트는 패션 수요 예측에 멀티모달 학습을 적용합니다. 회전 자감시 과제를 이용한 능동 학습에 대한 관련 연구는 자매 저장소를 참고하세요: [kim2024interpreting](https://github.com/DongJooKim1541/kim2024interpreting)
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+자세한 내용은 [LICENSE](LICENSE)를 참고하세요.
 
 ## Contact
 
-For questions or issues:
-- **Email:** dongjoo.kim@hanwha.com
-- **Affiliation:** Vision Modeling Lab, Hanyang University
+질문이나 문제 사항:
+- **이메일:** dongjookim1541@gmail.com
+- **소속:** 한양대학교 응용인공지능학과
