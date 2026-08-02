@@ -1,5 +1,6 @@
 import os
 import time
+from typing import Any, Dict, List, Tuple, Optional, Union
 
 import numpy as np
 import torch
@@ -25,7 +26,7 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
 net_bert = BertModel.from_pretrained("bert-base-multilingual-cased")
 
 
-def get_bert_feature(clothing, tokenizer, net_bert):
+def get_bert_feature(clothing: str, tokenizer: BertTokenizer, net_bert: BertModel) -> torch.Tensor:
     encoded_input = tokenizer(clothing, return_tensors='pt')
     output = net_bert(**encoded_input)
     # print(output[1].shape)
@@ -88,7 +89,7 @@ test_epoch_view_loss = []
 test_epoch_sales_loss = []
 
 
-def train(model, train_loader, optimizer):
+def train(model: nn.Module, train_loader: DataLoader, optimizer: torch.optim.Optimizer) -> None:
     model.train()
 
     train_best_sex_loss_list = []
@@ -213,15 +214,15 @@ def train(model, train_loader, optimizer):
     train_epoch_view_loss.append(epoch_view_loss)
     train_epoch_sales_loss.append(epoch_sales_loss)
 
-def get_bert_feature_by_batch(clothing_feature):
+def get_bert_feature_by_batch(clothing_feature: List[torch.Tensor]) -> torch.Tensor:
     for i in range(0,len(clothing_feature)):
         if i == 0:
-            out_concat=clothing_feature[0]
+            out_concat: torch.Tensor = clothing_feature[0]
         else:
             out_concat = torch.cat((out_concat, clothing_feature[i]), dim=0)
     return out_concat
 
-def evaluate(model, test_loader):
+def evaluate(model: nn.Module, test_loader: DataLoader) -> None:
     model.eval()
 
     test_best_sex_loss = 0

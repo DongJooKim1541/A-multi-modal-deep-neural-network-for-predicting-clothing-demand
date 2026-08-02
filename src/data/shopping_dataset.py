@@ -7,6 +7,7 @@ from torchvision import transforms
 from PIL import Image
 import random
 import math
+from typing import List, Tuple, Union, Optional, Dict, Any
 from ..config import *
 
 
@@ -32,19 +33,19 @@ print("len(sampleList), len(file_list_test): ", len(sampleList), len(file_list_t
 
 # define dataloader class
 class ShoppingDataset(Dataset):
-    def __init__(self, csv_info, train):
-        self.train=train
-        self.price=[]
-        self.category=[]
-        self.sex=[]
-        self.label_sales = []
-        self.label_best_sex=[]
-        self.label_best_age = []
-        self.label_view=[]
-        self.idx=[]
-        self.clothing_feature=[]
-        self.file_list_train=sampleList
-        self.file_list_test = file_list_test
+    def __init__(self, csv_info: List[Dict[Any, Any]], train: bool) -> None:
+        self.train: bool = train
+        self.price: List[int] = []
+        self.category: List[int] = []
+        self.sex: List[int] = []
+        self.label_sales: List[Union[int, float]] = []
+        self.label_best_sex: List[int] = []
+        self.label_best_age: List[int] = []
+        self.label_view: List[Union[int, float]] = []
+        self.idx: List[int] = []
+        self.clothing_feature: List[Union[torch.Tensor, Any]] = []
+        self.file_list_train: List[str] = sampleList
+        self.file_list_test: List[str] = file_list_test
         # print(csv_info[0]['0'].dtype) # torch.float32
         # {'goods_num': '2447685', 'sex': '2', 'best_sex': '1', 'best_age': '5', 'view': '3', 'sales': '0', 'price': '8', 'category': '4', 'Name': '0'}
         if self.train:
@@ -115,10 +116,10 @@ class ShoppingDataset(Dataset):
                 self.price.append(int(float(list[8])))
                 self.category.append(int(float(list[10])))
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.file_list)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, int, int, int, Union[int, float], Union[int, float], int, int, Union[torch.Tensor, Any], int]:
         if self.train:
             img_name = self.file_list_train[index]
             #print("getitem train")
@@ -132,7 +133,7 @@ class ShoppingDataset(Dataset):
             img = self.transform2(img)
             return img, self.sex[index],self.label_best_sex[index],self.label_best_age[index],self.label_view[index],self.label_sales[index],self.price[index],self.category[index],self.clothing_feature[index],index
 
-    def transform(self, image):
+    def transform(self, image: Image.Image) -> torch.Tensor:
         transform_ops = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomVerticalFlip(),
@@ -142,7 +143,7 @@ class ShoppingDataset(Dataset):
         ])
         return transform_ops(image)
 
-    def transform2(self, image):
+    def transform2(self, image: Image.Image) -> torch.Tensor:
         transform_ops = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
