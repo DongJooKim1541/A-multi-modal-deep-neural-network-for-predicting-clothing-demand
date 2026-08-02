@@ -1,22 +1,25 @@
 import os
 import torch
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
 
-def ensure_output_dirs(*dirs):
+def ensure_output_dirs(*dirs: Union[str, Path]) -> None:
     """Create directories if they don't exist."""
     for directory in dirs:
         os.makedirs(directory, exist_ok=True)
 
 
-def save_checkpoint(model, filepath):
+def save_checkpoint(model: torch.nn.Module, filepath: Union[str, Path]) -> None:
     """Save model state dict to checkpoint file."""
-    directory = os.path.dirname(filepath)
+    filepath = Path(filepath)
+    directory = filepath.parent
     ensure_output_dirs(directory)
     torch.save(model.state_dict(), filepath)
     print(f"Checkpoint saved to {filepath}")
 
 
-def save_run_results(filepath, **results_dict):
+def save_run_results(filepath: Union[str, Path], **results_dict: Any) -> None:
     """
     Save training results to text file in existing format.
 
@@ -24,7 +27,8 @@ def save_run_results(filepath, **results_dict):
         filepath: Path to save results (e.g., 'results/AccLoss2.txt')
         **results_dict: Dictionary of results to save (e.g., num_epochs=3000, batch_size=64)
     """
-    directory = os.path.dirname(filepath)
+    filepath = Path(filepath)
+    directory = filepath.parent
     ensure_output_dirs(directory)
 
     with open(filepath, 'a') as f:

@@ -1,8 +1,11 @@
 import torch
 import numpy as np
+from typing import Tuple
 
 
-def focal_loss(logits, labels, criterion_for_focal, alpha, gamma):
+def focal_loss(logits: torch.Tensor, labels: torch.Tensor,
+               criterion_for_focal: torch.nn.CrossEntropyLoss,
+               alpha: float, gamma: float) -> torch.Tensor:
     """
     Compute focal loss for imbalanced classification.
 
@@ -22,10 +25,15 @@ def focal_loss(logits, labels, criterion_for_focal, alpha, gamma):
     return focal
 
 
-def combined_multitask_loss(pred_best_sex, pred_best_age, pred_view, pred_sales,
-                             label_best_sex, label_best_age, label_view, label_sales,
-                             criterion, criterion_for_focal, criterion_regression,
-                             alpha, gamma, loss_alpha, loss_beta):
+def combined_multitask_loss(pred_best_sex: torch.Tensor, pred_best_age: torch.Tensor,
+                            pred_view: torch.Tensor, pred_sales: torch.Tensor,
+                            label_best_sex: torch.Tensor, label_best_age: torch.Tensor,
+                            label_view: torch.Tensor, label_sales: torch.Tensor,
+                            criterion: torch.nn.CrossEntropyLoss,
+                            criterion_for_focal: torch.nn.CrossEntropyLoss,
+                            criterion_regression: torch.nn.MSELoss,
+                            alpha: float, gamma: float,
+                            loss_alpha: float, loss_beta: float) -> torch.Tensor:
     """
     Compute combined multi-task loss: CE(best_sex) + focal(best_age) + α*MSE(view) + β*MSE(sales).
 
@@ -41,24 +49,18 @@ def combined_multitask_loss(pred_best_sex, pred_best_age, pred_view, pred_sales,
     Returns:
         Scalar combined loss value
     """
-    # CE for best_sex
     loss_sex = criterion(pred_best_sex, label_best_sex)
-
-    # Focal loss for best_age
     loss_age_ce = criterion_for_focal(pred_best_age, label_best_age)
     pt_age = torch.exp(-loss_age_ce)
     loss_age = (alpha * (1 - pt_age) ** gamma * loss_age_ce).mean()
-
-    # MSE for view and sales (regression)
     loss_view = criterion_regression(pred_view, label_view)
     loss_sales = criterion_regression(pred_sales, label_sales)
-
-    # Combined loss
     total_loss = loss_sex + loss_age + loss_alpha * loss_view + loss_beta * loss_sales
     return total_loss
 
 
-def joint_accuracy(pred_best_sex, pred_best_age, label_best_sex, label_best_age):
+def joint_accuracy(pred_best_sex: torch.Tensor, pred_best_age: torch.Tensor,
+                   label_best_sex: torch.Tensor, label_best_age: torch.Tensor) -> int:
     """
     Compute accuracy where both best_sex and best_age predictions are correct.
 
