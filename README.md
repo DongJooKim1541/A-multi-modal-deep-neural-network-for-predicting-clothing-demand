@@ -42,15 +42,13 @@ kim2022multi/
     │   ├── __init__.py
     │   └── resnet_pre_trained.py    (ResNet18 + BERT 융합 멀티태스크 모델)
     ├── data/
-    │   └── shopping_dataset.py      (파일명 파싱을 포함한 무신사 데이터셋 로더)
+    │   └── shopping_dataset.py      (데이터셋 로더: 이미지 파일명 파싱 및 BERT 특징 통합)
     ├── utils/
     │   ├── bert_features.py         (BERT 토큰화 및 특징 추출)
     │   ├── training_utils.py        (포칼 손실, 멀티태스크 손실, 정확도 메트릭)
     │   └── io_utils.py              (체크포인트/결과 저장, 디렉토리 생성)
     ├── train.py                     (메인 훈련 루프: 4개 헤드 결합 학습)
-    ├── train_single_task.py         (단일 태스크 어블레이션: 헤드별 평가)
-    └── scraping/
-        └── musinsa_scraper.py       (데이터셋 수집용 웹 스크래핑 파이프라인)
+    └── train_single_task.py         (단일 태스크 어블레이션: 헤드별 평가)
 ```
 
 ## Installation
@@ -58,7 +56,6 @@ kim2022multi/
 ### Prerequisites
 - Python 3.8+
 - CUDA 11.0+ (GPU 훈련용)
-- ChromeDriver (데이터 수집용)
 
 ### Setup
 
@@ -75,41 +72,91 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+## Environment Configuration
+
+Configuration is managed through `src/config.py`, which supports environment variables loaded from a `.env` file. This allows you to override default hyperparameters without modifying source code.
+
+### Setup .env File
+
+1. Copy the example configuration:
+
+```bash
+cp .env.example .env
+```
+
+2. Customize values in `.env` as needed:
+
+```env
+# Training Configuration
+BATCH_SIZE=64
+NUM_EPOCHS=3000
+LR=0.0001
+WEIGHT_DECAY=1e-5
+CLIP_NORM=5
+
+# Focal Loss (for age prediction)
+FOCAL_ALPHA=1
+FOCAL_GAMMA=2
+
+# Multi-Task Loss Weights
+LOSS_ALPHA=0.01  # Weight for view count regression
+LOSS_BETA=0.01   # Weight for sales volume regression
+
+# CUDA Device Selection
+CUDA_VISIBLE_DEVICES=0
+
+# Optional: Data and Output Paths (uses defaults if not set)
+# DATA_PATH=/path/to/dataset/category_all_ver2_20221002_words_125_aug
+# CSV_PATH=/path/to/dataset/goodsNum_clothing_name_20221002.csv
+# CHECKPOINT_DIR=/path/to/checkpoints
+# RESULTS_DIR=/path/to/results
+```
+
+### Environment Variables Reference
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BATCH_SIZE` | 64 | Batch size per GPU |
+| `NUM_EPOCHS` | 3000 | Number of training epochs |
+| `LR` | 0.0001 | Adam optimizer learning rate |
+| `WEIGHT_DECAY` | 1e-5 | L2 regularization coefficient |
+| `CLIP_NORM` | 5 | Gradient clipping threshold |
+| `FOCAL_ALPHA` | 1 | Focal loss α (age prediction) |
+| `FOCAL_GAMMA` | 2 | Focal loss γ (age prediction) |
+| `LOSS_ALPHA` | 0.01 | Multi-task weight for view prediction |
+| `LOSS_BETA` | 0.01 | Multi-task weight for sales prediction |
+| `CUDA_VISIBLE_DEVICES` | 0 | GPU device ID(s) |
+| `DATA_PATH` | `dataset/category_all_ver2_20221002_words_125_aug/` | Dataset image directory |
+| `CSV_PATH` | `dataset/goodsNum_clothing_name_20221002.csv` | Product metadata CSV |
+| `CHECKPOINT_DIR` | `checkpoints/` | Directory for model checkpoints |
+| `RESULTS_DIR` | `results/` | Directory for training results |
+
+All values are loaded automatically when you run `src/config.py`. If `.env` is not present, hardcoded defaults are used.
+
 ## Dataset
 
-데이터셋은 한국 온라인 패션 쇼핑몰인 [무신사](https://www.musinsa.com/)에서 상품 정보를 스크래핑하여 구성됩니다.
+데이터셋은 온라인 패션 쇼핑몰 데이터로 구성되며, 저장소에 포함되지 않습니다.
 
-**기대되는 구조** (저장소에 포함되지 않음):
+**기대되는 구조**:
 ```
 dataset/
-├── train/
-│   ├── <상품_id>.png  (125×125로 크기 조정)
+├── category_all_ver2_20221002_words_125_aug/
+│   ├── 0/*.png   (125×125 RGB images)
+│   ├── 1/*.png
 │   └── ...
-├── test/
-│   ├── <상품_id>.png
-│   └── ...
-└── info.csv              (상품 메타데이터 및 라벨)
+└── goodsNum_clothing_name_20221002.csv  (상품 메타데이터)
 ```
 
-**주의:** 데이터셋은 무신사의 저작권 및 이용약관 고려사항으로 인해 본 저장소에서 재배포되지 않습니다. 데이터셋을 다시 구성하려면 스크래핑 파이프라인을 실행하세요 (아래 사용법 참고).
+**Filename Format:** 각 이미지 파일명은 다음 형식을 따릅니다:
+```
+{idx}_{goodsNum}_{sex}_{best_sex}_{best_age}_{view}_{category}_{price}_{sales}_{extra1}_{extra2}.png
+```
+
+자세한 내용은 [docs/SDD.md - 데이터 흐름 및 라벨 인코딩](docs/SDD.md#4-data-flow--label-encoding)을 참고하세요.
 
 ## Usage
 
-### 1. Data Collection (Optional)
-
-무신사에서 상품 데이터 스크래핑:
-
-```bash
-# ChromeDriver 경로 설정
-export CHROMEDRIVER_PATH=/경로/to/chromedriver  # 또는 환경변수로 설정
-
-# 스크래퍼 실행 (수시간 소요 가능)
-python -m src.scraping.musinsa_scraper
-```
-
-**출력:** `dataset/train/`, `dataset/test/`, `info.csv`
-
-### 2. Multi-Task Training
+### Multi-Task Training
 
 4개 헤드를 결합 손실로 동시 훈련:
 
@@ -118,12 +165,12 @@ python -m src.train
 ```
 
 **출력:**
-- 모델 체크포인트: `model_weights/...model_state_dict.pt`
+- 모델 체크포인트: `checkpoints/...model_state_dict.pt`
 - 훈련 로그: `results/AccLoss2.txt`
 
-**설정:** `src/config.py`를 수정하여 하이퍼파라미터 조정 (batch, lr, epoch, loss weight).
+**설정:** `.env` 파일을 통해 하이퍼파라미터 조정 (예: `BATCH_SIZE`, `NUM_EPOCHS`, `LR`). 또는 `src/config.py`의 기본값을 직접 수정.
 
-### 3. Single-Task Evaluation (Ablation Study)
+### Single-Task Evaluation (Ablation Study)
 
 각 예측 헤드를 독립적으로 평가:
 

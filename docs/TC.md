@@ -290,7 +290,7 @@ except Exception as e:
 
 ---
 
-## Integration Tests (TC-INT-000 to TC-INT-004)
+## Integration Tests (TC-INT-000 to TC-INT-003)
 
 ### TC-INT-000: Full training loop (1 epoch, tiny dataset)
 
@@ -348,15 +348,7 @@ print("✓ Full training loop completed 1 step")
 
 ---
 
-### TC-INT-001: Thompson Sampling (DTS) integration
-
-**Note:** DTS not in current implementation. This test is a placeholder for future multi-armed bandit variant.
-
-**Status:** Skipped (not implemented in current version)
-
----
-
-### TC-INT-002: Evaluation loop (1 epoch)
+### TC-INT-001: Evaluation loop (1 epoch)
 
 **Test:**
 ```python
@@ -399,7 +391,7 @@ print(f"✓ Evaluation complete: sex_acc={acc_sex:.1f}%, age_acc={acc_age:.1f}%"
 
 ---
 
-### TC-INT-003: Checkpoint save/load
+### TC-INT-002: Checkpoint save/load
 
 **Test:**
 ```python
@@ -427,7 +419,7 @@ print("✓ Checkpoint save/load successful")
 
 ---
 
-### TC-INT-004: analysis CLI argument (train_single_task.py)
+### TC-INT-003: analysis CLI argument (train_single_task.py)
 
 **Test:** Verify argparse handles --analysis correctly
 
@@ -587,19 +579,18 @@ print("✓ get_bert_feature_by_batch() correctly uses == not is")
 | Category | Count | Status |
 |----------|-------|--------|
 | Unit Tests (TC-000 to TC-010) | 11 | ✓ Full coverage |
-| Integration Tests (TC-INT-000 to TC-INT-004) | 5 | ✓ Core pipeline |
+| Integration Tests (TC-INT-000 to TC-INT-003) | 4 | ✓ Core pipeline |
 | System Tests (TC-PAPER-001 to TC-PAPER-003) | 3 | ✓ Paper alignment |
 | Regression Tests (TC-REG-001 to TC-REG-002) | 2 | ✓ Bug fix pinning |
-| **Total Assertions** | **73+** | — |
+| **Total Assertions** | **70+** | — |
 
 ---
 
 ## Known Test Limitations
 
-1. **Real Data:** Unit/integration tests use dummy data. True validation requires actual Musinsa image files and CSV.
-2. **DTS/Multi-Armed Bandit:** Not implemented in current version; placeholder test included.
-3. **End-to-End Reproducibility:** Paper results require exact random seed control (not yet in config).
-4. **Accuracy Thresholds:** No specific accuracy targets pinned; tests are structural, not metric-based.
+1. **Real Data:** Unit/integration tests use dummy data. True validation requires actual image files and CSV.
+2. **End-to-End Reproducibility:** Paper results require exact random seed control (not yet in config).
+3. **Accuracy Thresholds:** No specific accuracy targets pinned; tests are structural, not metric-based.
 
 ---
 

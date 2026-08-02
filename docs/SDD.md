@@ -28,20 +28,15 @@ Multi-modal fusion network combining CNN (image) + BERT (text) + metadata, train
 │                    TRAINING PIPELINE                         │
 └─────────────────────────────────────────────────────────────┘
 
-Step 1: Data Collection (musinsa_scraper.py)
-   ├─ Web scrape from Musinsa e-commerce site
-   ├─ Extract product images, metadata
-   └─ Output: images + CSV with goods_num, name, demographics
-
-Step 2: Dataset Preparation (shopping_dataset.py + bert_features.py)
-   ├─ Load images from DATA/train/{0-9}/*.png (50k training images)
+Step 1: Dataset Preparation (shopping_dataset.py + bert_features.py)
+   ├─ Load images from dataset/category_all_ver2_20221002_words_125_aug/{0-9}/*.png
    ├─ Tokenize product names with BERT (bert-base-multilingual-cased)
    ├─ Extract [CLS] token embeddings → 768D features
    ├─ Parse filename for labels: sex, best_sex, best_age, view, sales
    ├─ 80/20 train/test split (random, no stratification)
    └─ Output: ShoppingDataset with 10 fields per sample
 
-Step 3: Model Definition (src/models/resnet_pre_trained.py)
+Step 2: Model Definition (src/models/resnet_pre_trained.py)
    ├─ Backbone: ResNet18 (ImageNet pretrained)
    ├─ Image path: Conv layers → [512D] → Avg pooling
    ├─ Fusion: [512D image || 3D metadata || 768D BERT] → 1283D
@@ -49,14 +44,14 @@ Step 3: Model Definition (src/models/resnet_pre_trained.py)
    ├─ Outputs: (best_sex[3], best_age[7], view[1], sales[1])
    └─ Total params: ~12M
 
-Step 4: Multi-Task Training (src/train.py)
+Step 3: Multi-Task Training (src/train.py)
    ├─ Loss: CE(best_sex) + Focal(best_age) + 0.01*MSE(view) + 0.01*MSE(sales)
    ├─ Optimizer: Adam (lr=1e-4, weight_decay=1e-5)
    ├─ Batch size: 64 | Epochs: 3000
-   ├─ Device: 4-GPU DataParallel (CUDA 0,1,2,3)
+   ├─ Device: Supports GPU and CPU (auto-detected)
    └─ Output: Checkpoints + AccLoss2.txt
 
-Step 5: Single-Task Evaluation (src/train_single_task.py)
+Step 4: Single-Task Evaluation (src/train_single_task.py)
    ├─ Ablation mode: train one head at a time
    ├─ CLI: --analysis {best_sex|best_age|view|sales}
    ├─ Loss: Appropriate to task type
@@ -67,33 +62,7 @@ Step 5: Single-Task Evaluation (src/train_single_task.py)
 
 ## 3. Module Descriptions
 
-### 3.1 src/scraping/musinsa_scraper.py
-
-**Purpose:** Autonomous web scraper to collect clothing product data from Musinsa e-commerce platform.
-
-**Input:** Musinsa product page URLs (auto-enumerated by product ID)
-
-**Process:**
-- Open each product page via Selenium WebDriver
-- Extract metadata: gender, best_sex, best_age, view_count, cumulative_sales, price, category
-- Download thumbnail image
-- Write to CSV and disk
-
-**Output:**
-```
-- CSV: dataset/goodsNum_clothing_name_YYYYMMDD.csv
-  Columns: index, goods_num, clothing_name
-- Images: images/thumbnail_*.jpg (product thumbnails)
-- Info: info.csv (scrape log)
-```
-
-**Known Issues (documented, not fixed):**
-- Per-iteration Chrome process creation (expensive for ~9.2M product IDs)
-- Hardcoded chromedriver path (machine-specific, requires env var parameterization)
-- Bare `except:` clause without logging
-- Guardian None-check runs after field access (would crash on missing fields, relying on outer try/except)
-
-### 3.2 src/data/shopping_dataset.py
+### 3.1 src/data/shopping_dataset.py
 
 **Purpose:** PyTorch Dataset loader merging image files, CSV metadata, and BERT features into a unified training interface.
 
@@ -145,7 +114,7 @@ Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
 - `label_best_sex_and_best_age` computed but unused (was intended for stratified split, now disabled)
 - Unused `get_bert_feature()` method on class (duplicates module-level function in train.py)
 
-### 3.3 src/models/resnet_pre_trained.py
+### 3.2 src/models/resnet_pre_trained.py
 
 **Purpose:** Multi-modal fusion network combining image, metadata, and text features for joint prediction of 4 clothing demand metrics.
 
@@ -196,7 +165,7 @@ def forward(self, image, sex, price, category, bert_feature):
 - FC hidden dims: 1283 → 64
 - Dropout rate: 0.5
 
-### 3.4 src/train.py (main.py refactored)
+### 3.3 src/train.py
 
 **Purpose:** Multi-task training loop implementing the paper's joint learning approach.
 
@@ -232,7 +201,7 @@ focal = (alpha * (1 - pt)^gamma * loss).mean()
 - NaN/Inf guard in `evaluate()` runs AFTER accumulating into totals (unlike `train()`, which guards before) — asymmetry, result is documented but not fixed to preserve original behavior
 - Dead `get_bert_feature()` method in ShoppingDataset (never called)
 
-### 3.5 src/train_single_task.py (main_noword_ablation.py refactored)
+### 3.4 src/train_single_task.py
 
 **Purpose:** Single-task ablation mode to evaluate each prediction head independently.
 
@@ -261,7 +230,7 @@ results/AccLoss2.txt
 └─ per-epoch metrics
 ```
 
-### 3.6 src/utils/bert_features.py
+### 3.5 src/utils/bert_features.py
 
 **Purpose:** Centralized BERT loading and feature extraction (replaces duplication in main.py and main_noword_ablation.py).
 
@@ -287,7 +256,7 @@ results/AccLoss2.txt
 - Load CSV, iterate rows, extract BERT for each product name
 - Returns: list of {goods_num: [1,768]} dicts
 
-### 3.7 src/utils/training_utils.py
+### 3.6 src/utils/training_utils.py
 
 **Purpose:** Shared loss and accuracy computation functions (replaces duplication in train.py and train_single_task.py).
 
@@ -314,7 +283,7 @@ return loss_sex + loss_age + 0.01*loss_view + 0.01*loss_sales
 - Count samples where BOTH best_sex AND best_age predictions are correct
 - Returns: int (count of correct joint predictions)
 
-### 3.8 src/utils/io_utils.py
+### 3.7 src/utils/io_utils.py
 
 **Purpose:** Directory creation and result file I/O utilities.
 
@@ -447,8 +416,7 @@ L_total = L_sex + L_age_focal + loss_alpha * L_view + loss_beta * L_sales
 | Focal Loss (α=1, γ=2) | `src/utils/training_utils.py:focal_loss()` | ✅ Exact match |
 | Transformer Encoder (BERT multilingual) | `src/utils/bert_features.py:load_bert()` | ✅ Exact match |
 | Data Augmentation (train: RHFlip, RVFlip, RRC; test: deterministic) | `src/data/shopping_dataset.py:transform() / transform2()` | ✅ Exact match |
-| Validation Set (1% of training data) | `config.py: V = 0.01` | ✅ Defined but not actively used in current code |
-| Results: CIFAR-100 @ various labeled data points | (Not applicable; this project uses Musinsa data) | — |
+| Train/Test Split (80/20 random) | `src/data/shopping_dataset.py:__init__()` | ✅ Implemented |
 
 ---
 
