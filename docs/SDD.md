@@ -285,21 +285,22 @@ return loss_sex + loss_age + 0.01*loss_view + 0.01*loss_sales
 
 ### 3.7 src/utils/io_utils.py
 
-**Purpose:** Directory creation and result file I/O utilities.
+**Purpose:** Utility functions for directory creation and checkpoint/results I/O.
 
 **Key Functions:**
 
 **`ensure_output_dirs(*dirs)`**
-- os.makedirs for each directory with exist_ok=True
-- ← **BUG FIX #4:** Called from train() and train_single_task() to create model_weights/ and results/ before saving
+- Creates directories via os.makedirs with exist_ok=True
+- Used by save_checkpoint() to create parent directories
 
 **`save_checkpoint(model, filepath)`**
-- torch.save(model.state_dict(), filepath)
-- Creates parent directory if needed
+- Saves model state_dict via torch.save
+- Automatically creates parent directory if needed
 
 **`save_run_results(filepath, **results_dict)`**
-- Write results dictionary to text file in existing format
-- Same format as original main.py's manual f.write() calls
+- Appends results dictionary to text file in key-value format
+- Automatically creates parent directory if needed
+- Format: "key: value" for scalars, "key= [list]" for lists
 
 ---
 
