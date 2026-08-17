@@ -4,8 +4,10 @@ from pathlib import Path
 from typing import List, Dict, Tuple, Union, Optional
 from transformers import BertTokenizer, BertModel
 
+from ..config import bert_model_name, bert_feature_dim
 
-def load_bert(model_name: str = "bert-base-multilingual-cased",
+
+def load_bert(model_name: str = bert_model_name,
               device: str = "cpu") -> Tuple[BertTokenizer, BertModel]:
     """Load BERT tokenizer and model, move to device."""
     tokenizer = BertTokenizer.from_pretrained(model_name)
@@ -49,7 +51,7 @@ def build_csv_info(csv_path: Union[str, Path], tokenizer: BertTokenizer,
         if clothing_name and clothing_name != 'nan':
             feature = get_bert_feature(clothing_name, tokenizer, net_bert, device)
         else:
-            feature = torch.zeros(1, 768)
+            feature = torch.zeros(1, bert_feature_dim)
 
         csv_info_dict = {goods_num: feature}
         csv_info.append(csv_info_dict)

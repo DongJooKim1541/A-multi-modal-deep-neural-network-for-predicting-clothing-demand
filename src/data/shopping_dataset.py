@@ -24,7 +24,7 @@ for file_name in file_list:
     label_best_sex_and_best_age.append(int(float(list[6])) * 1000 + int(float(list[3])) * 100 +int(float(list[4])) * 10 + int(float(list[8])))
 
 #file_list_train,file_list_test=train_test_split(file_list, random_state=0, stratify=label_best_sex_and_best_age)
-file_list_train,file_list_test=train_test_split(file_list, random_state=0)
+file_list_train,file_list_test=train_test_split(file_list, random_state=split_random_state)
 
 # dataset random sampling, (file_list,data_size)
 sampleList = random.sample(file_list_train, len(file_list_train))
@@ -69,7 +69,7 @@ class ShoppingDataset(Dataset):
                     # print("words: ", words) # 배색큐롯스커트(W)
                     self.clothing_feature.append(words_feature)
                 else:
-                    zero_tensor=torch.zeros(1,768)
+                    zero_tensor=torch.zeros(1, bert_feature_dim)
                     self.clothing_feature.append(zero_tensor)
                 self.sex.append(int(float(list[2])))
                 self.label_best_sex.append(int(float(list[3])))
@@ -100,7 +100,7 @@ class ShoppingDataset(Dataset):
                     words_feature = word_dict[str(index)]
                     self.clothing_feature.append(words_feature)
                 else:
-                    zero_tensor = torch.zeros(1, 768)
+                    zero_tensor = torch.zeros(1, bert_feature_dim)
                     self.clothing_feature.append(zero_tensor)
                 self.sex.append(int(float(list[2])))
                 self.label_best_sex.append(int(float(list[3])))
@@ -137,15 +137,15 @@ class ShoppingDataset(Dataset):
         transform_ops = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomVerticalFlip(),
-            transforms.RandomResizedCrop((125,125),scale=(0.1,1),ratio=(0.5,2)),
+            transforms.RandomResizedCrop((image_size, image_size), scale=crop_scale, ratio=crop_ratio),
             transforms.ToTensor(),
-            transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+            transforms.Normalize(mean=norm_mean, std=norm_std),
         ])
         return transform_ops(image)
 
     def transform2(self, image: Image.Image) -> torch.Tensor:
         transform_ops = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+            transforms.Normalize(mean=norm_mean, std=norm_std),
         ])
         return transform_ops(image)

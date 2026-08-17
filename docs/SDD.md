@@ -232,7 +232,7 @@ results/AccLoss2.txt
 
 ### 3.5 src/utils/bert_features.py
 
-**Purpose:** Centralized BERT loading and feature extraction (replaces duplication in main.py and main_noword_ablation.py).
+**Purpose:** Centralized BERT loading and feature extraction, shared by `src/train.py` and `src/train_single_task.py`.
 
 **Key Functions:**
 

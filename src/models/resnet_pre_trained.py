@@ -4,6 +4,11 @@ import torch.nn.functional as F
 from typing import Tuple
 from torchvision.models import resnet18, resnet34, vgg16
 
+from ..config import (
+    bert_feature_dim, image_feature_dim, meta_feature_dim, fusion_hidden_dim,
+    dropout_rate, num_best_sex_class, num_best_age_class, num_sales_class,
+)
+
 resnet = resnet18(pretrained=True)
 
 
@@ -12,9 +17,9 @@ class ResNet(nn.Module):
 
     def __init__(self) -> None:
         super(ResNet, self).__init__()
-        self.num_best_sex_class = 3
-        self.num_best_age_class = 7
-        self.num_sales_class = 7
+        self.num_best_sex_class = num_best_sex_class
+        self.num_best_age_class = num_best_age_class
+        self.num_sales_class = num_sales_class
 
         resnet_modules = list(resnet.children())[:-3]
         self.cnn1 = nn.Sequential(*resnet_modules)
@@ -23,13 +28,16 @@ class ResNet(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU()
         )
-        self.dropout = nn.Dropout(0.5)
-        self.bn1 = nn.BatchNorm1d(512 + 768 + 3)
-        self.linear1 = nn.Linear(512 + 768 + 3, 64)
-        self.linear_best_sex = nn.Linear(64, self.num_best_sex_class)
-        self.linear_best_age = nn.Linear(64, self.num_best_age_class)
-        self.linear_view = nn.Linear(64, 1)
-        self.linear_sales = nn.Linear(64, 1)
+        self.dropout = nn.Dropout(dropout_rate)
+        # image_feature_dim (512) is the flattened CNN output for the configured
+        # IMAGE_SIZE of 125; changing IMAGE_SIZE requires updating it to match.
+        fusion_dim = image_feature_dim + bert_feature_dim + meta_feature_dim
+        self.bn1 = nn.BatchNorm1d(fusion_dim)
+        self.linear1 = nn.Linear(fusion_dim, fusion_hidden_dim)
+        self.linear_best_sex = nn.Linear(fusion_hidden_dim, self.num_best_sex_class)
+        self.linear_best_age = nn.Linear(fusion_hidden_dim, self.num_best_age_class)
+        self.linear_view = nn.Linear(fusion_hidden_dim, 1)
+        self.linear_sales = nn.Linear(fusion_hidden_dim, 1)
 
     def forward(self, image: torch.Tensor, sex: torch.Tensor, price: torch.Tensor,
                 category: torch.Tensor, bert_feature: torch.Tensor) -> Tuple[torch.Tensor, ...]:

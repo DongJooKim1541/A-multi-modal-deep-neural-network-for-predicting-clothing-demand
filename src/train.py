@@ -22,8 +22,8 @@ else:
 print('Using PyTorch version: ', torch.__version__)
 
 # implement bert
-tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
-net_bert = BertModel.from_pretrained("bert-base-multilingual-cased")
+tokenizer = BertTokenizer.from_pretrained(bert_model_name)
+net_bert = BertModel.from_pretrained(bert_model_name)
 
 
 def get_bert_feature(clothing: str, tokenizer: BertTokenizer, net_bert: BertModel) -> torch.Tensor:
@@ -57,7 +57,7 @@ for i in range(0, len(df)):
 """Data preprocessing"""
 trainset = ShoppingDataset(csv_info, train=True)
 testset = ShoppingDataset(csv_info, train=False)
-train_loader = DataLoader(trainset, batch_size=batch_size, num_workers=4, shuffle=True)
+train_loader = DataLoader(trainset, batch_size=batch_size, num_workers=num_workers, shuffle=True)
 test_loader = DataLoader(testset, batch_size=batch_size, num_workers=0, shuffle=False)
 
 """Confirm data"""
