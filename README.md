@@ -126,12 +126,50 @@ CUDA_VISIBLE_DEVICES=0
 | `LOSS_ALPHA` | 0.01 | Multi-task weight for view prediction |
 | `LOSS_BETA` | 0.01 | Multi-task weight for sales prediction |
 | `CUDA_VISIBLE_DEVICES` | 0 | GPU device ID(s) |
-| `DATA_PATH` | `dataset/category_all_ver2_20221002_words_125_aug/` | Dataset image directory |
-| `CSV_PATH` | `dataset/goodsNum_clothing_name_20221002.csv` | Product metadata CSV |
-| `CHECKPOINT_DIR` | `checkpoints/` | Directory for model checkpoints |
-| `RESULTS_DIR` | `results/` | Directory for training results |
+| `NUM_WORKERS` | 0 on Windows, 4 elsewhere | DataLoader worker processes |
 
-All values are loaded automatically when you run `src/config.py`. If `.env` is not present, hardcoded defaults are used.
+**Text encoder:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BERT_MODEL_NAME` | `bert-base-multilingual-cased` | HuggingFace model id for the product-name encoder |
+| `BERT_FEATURE_DIM` | 768 | `[CLS]` embedding width |
+
+**Image preprocessing:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `IMAGE_SIZE` | 125 | RandomResizedCrop output size |
+| `CROP_SCALE` | `0.1,1` | RandomResizedCrop scale range |
+| `CROP_RATIO` | `0.5,2` | RandomResizedCrop aspect-ratio range |
+| `NORM_MEAN` | `0.485,0.456,0.406` | Channel means (ImageNet) |
+| `NORM_STD` | `0.229,0.224,0.225` | Channel std devs (ImageNet) |
+| `SPLIT_RANDOM_STATE` | 0 | `train_test_split` seed |
+
+**Model:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `IMAGE_FEATURE_DIM` | 512 | Flattened CNN output. Tied to `IMAGE_SIZE=125` — recompute if you change it |
+| `META_FEATURE_DIM` | 3 | Metadata width (sex, price, category) |
+| `FUSION_HIDDEN_DIM` | 64 | Width of the shared layer feeding all four heads |
+| `DROPOUT_RATE` | 0.5 | Dropout after the fusion layer |
+| `NUM_BEST_SEX_CLASS` | 3 | Preferred-gender head classes |
+| `NUM_BEST_AGE_CLASS` | 7 | Preferred-age-group head classes |
+| `NUM_SALES_CLASS` | 7 | Sales head classes (unused by the regression head) |
+
+**Paths:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DATA_PATH` | `<project>/dataset/category_all_ver2_20221002_words_125_aug/` | Dataset image directory |
+| `CSV_PATH` | `<project>/dataset/goodsNum_clothing_name_20221002.csv` | Product metadata CSV |
+| `CHECKPOINT_DIR` | `<project>/checkpoints/` | Directory for model checkpoints |
+| `RESULTS_DIR` | `<project>/results/` | Directory for training results |
+
+Defaults are resolved relative to the repository root. Values load automatically from `.env`
+if present; otherwise the defaults above apply. See [`.env.example`](.env.example) for a
+copy-ready template.
 
 ## Dataset
 
@@ -188,7 +226,7 @@ python -m src.train_single_task --analysis view
 python -m src.train_single_task --analysis sales
 ```
 
-**주의:** 스크립트명("train_single_task")과 달리 이 모드는 여전히 BERT feature을 사용합니다. 이는 단일 태스크 어블레이션(한 번에 하나의 헤드)이지 텍스트 제거 설정은 아닙니다. 자세한 내용은 [docs/SDD.md](docs/SDD.md#8-알려진-한계-및-편차)를 참고하세요.
+**주의:** 스크립트명("train_single_task")과 달리 이 모드는 여전히 BERT feature을 사용합니다. 이는 단일 태스크 어블레이션(한 번에 하나의 헤드)이지 텍스트 제거 설정은 아닙니다. 자세한 내용은 [docs/SDD.md](docs/SDD.md#8-known-limitations--deviations)를 참고하세요.
 
 ## Experimental Results
 

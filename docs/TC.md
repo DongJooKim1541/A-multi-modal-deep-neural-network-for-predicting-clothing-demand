@@ -572,6 +572,53 @@ print("✓ get_bert_feature_by_batch() correctly uses == not is")
 ```
 **Assertion:** 6
 
+### TC-REG-003: Default paths stay inside the repository (BUG FIX #3 pinning)
+
+**Known Issue:** `PROJECT_ROOT` was `Path(__file__).parent.parent.parent`. Since `config.py`
+sits at `src/config.py`, that resolved to the directory *containing* the repository, so
+`DATA_PATH`, `CHECKPOINT_DIR` and `RESULTS_DIR` defaulted to paths outside the project.
+
+**Test:** run from the repository root with no path overrides set (`DATA_PATH`, `CSV_PATH`,
+`CHECKPOINT_DIR`, `RESULTS_DIR` unset, no `.env` defining them)
+
+```python
+from pathlib import Path
+from src import config
+
+assert config.PROJECT_ROOT == Path.cwd().resolve()
+assert config.CHECKPOINT_DIR.is_relative_to(config.PROJECT_ROOT)
+assert config.RESULTS_DIR.is_relative_to(config.PROJECT_ROOT)
+print("✓ default paths resolve inside the repository")
+```
+**Assertion:** 3
+
+### TC-REG-004: Model constants come from config (BUG FIX #4 pinning)
+
+**Known Issue:** BERT model name, feature width, image size, normalisation statistics,
+dropout and every head size were literals inside the model and dataset modules, so the
+documented environment variables had no effect on them.
+
+**Test:** overriding an environment variable changes the constructed model
+
+```python
+import os
+os.environ["FUSION_HIDDEN_DIM"] = "32"
+os.environ["NUM_BEST_AGE_CLASS"] = "5"
+
+from src import config
+from src.models import ResNet
+
+assert config.fusion_hidden_dim == 32
+net = ResNet()
+assert net.linear1.out_features == 32
+assert net.linear_best_age.out_features == 5
+print("✓ model widths follow config")
+```
+**Assertion:** 3
+
+**Note:** `IMAGE_FEATURE_DIM` (512) is the flattened CNN output for `IMAGE_SIZE=125`.
+Changing `IMAGE_SIZE` alone leaves the fusion layer mismatched — recompute both together.
+
 ---
 
 ## Test Execution & Coverage Summary
