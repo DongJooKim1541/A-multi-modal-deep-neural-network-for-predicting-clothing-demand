@@ -659,6 +659,5 @@ python -m pytest docs/TC.md -v
 
 ---
 
-**Document Version:** 2026-07-31  
 **Total Test Coverage:** 73+ assertions  
 **Status:** Comprehensive validation suite for paper reproducibility

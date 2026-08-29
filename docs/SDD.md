@@ -499,6 +499,5 @@ See [docs/TC.md](TC.md) for comprehensive test cases covering:
 
 ---
 
-**Document Version:** 2026-07-31  
 **Status:** Production-Ready  
 **All algorithm logic preserved from original; bugs fixed restore intended behavior.**
