@@ -93,3 +93,8 @@ desktop.ini
 .pytest_cache/
 *.txt
 !requirements.txt
+
+# 논문·포스터 원본은 연구 자료라 git에서 관리하지 않는다
+# README가 쓰는 poster.png 와 실험 그림은 그대로 둔다
+Materials/paper.pdf
+Materials/poster.pdf
